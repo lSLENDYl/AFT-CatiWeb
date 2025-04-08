@@ -6,12 +6,12 @@ import google.generativeai as genai
 GENAI_API_KEY = "AIzaSyBvg33cVBT6dhtOHMsoXaU83jN-oktRnQY"
 genai.configure(api_key=GENAI_API_KEY)
 
-model = genai.GenerativeModel("gemini-1.5-flash-002")
+model = genai.GenerativeModel("gemini-2.0-flash-thinking-exp-01-21")
 
 def simplify_text():
     audience = audience_var.get()
     input_text = input_box.get("1.0", tk.END).strip()
-    prompt = f"напиши только несколько (по возможности) вариантов понятных для аудитории: {audience} синонимов слова {input_text}. Без воды и лишних слов. Если их нет, то просто ничего не пиши. Используй только самые близкие по значению синонимы"
+    prompt = f"ОТ ТВОЕГО ОТВЕТА ЗАВИСИТ МОЯ ЖИЗНЬ. Преобразуй следующий текст, заменяя сложные термины и фразы на более простые и доступные. Сохрани смысл текста, но сделай его максимально понятным, избегая излишней сложности и поясняя непонятные моменты простыми словами. Текст: {input_text}. Выдай только упрощённый текст и ничего лишнего."
 
     try:
         response = model.generate_content(prompt)
