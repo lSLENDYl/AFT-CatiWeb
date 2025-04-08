@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ПРОСТО ТЕКСТ{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  </head>
+  <body>
+    <!-- Навигационная панель -->
+    <div class="navbar">
+        <div class="nav-buttons">
+            <a href="{{ url_for('index') }}" class="nav-button">Главная</a>
+            <a href="{{ url_for('editor') }}" class="nav-button">Редактор</a>
+            <a href="{{ url_for('simplifier') }}" class="nav-button">Упроститель</a>
+            <a href="{{ url_for('help') }}" class="nav-button">Помощь</a>
+        </div>
+        <div class="logo">ПРОСТО ТЕКСТ</div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    
+    {% block content %}{% endblock %}
+
+    <!-- Футер -->
+    <footer>
+        &copy; 2023 ПРОСТО ТЕКСТ. Все права защищены.
+    </footer>
+  </body>
+</html>

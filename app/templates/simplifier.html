@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Упроститель текста{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <h1>Упроститель текста</h1>
+        <p>Введите текст, который нужно упростить:</p>
+        <textarea class="text-input" placeholder="Введите ваш текст здесь..."></textarea>
+        <div class="buttons">
+            <button class="button">Упростить текст</button>
+        </div>
+        <p>Результат:</p>
+        <div class="text-output">
+            Здесь будет отображаться упрощенный текст...
+        </div>
+    </div>
+{% endblock %}
