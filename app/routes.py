@@ -1,7 +1,7 @@
 from app import app
 from app.forms import LoginForm
 from flask import render_template, flash, redirect, request
-from app import simplifierscript
+from app import simplifierscript, editorscript
 
 @app.route('/')
 @app.route('/index')
@@ -18,9 +18,15 @@ def login():
     return redirect('/index')
   return render_template('login.html', title='Sign In', form=form)
 
-@app.route('/editor')
+@app.route('/editor', methods=["GET", "POST"])
 def editor():
-    return render_template('editor.html', title='Редактор текста')
+    # return render_template('editor.html', title='Редактор текста')
+    if request.method == "POST":
+        input_text = request.form["input_text"]
+        simplified_text = editorscript.simplify_text(input_text)
+        print(simplified_text)
+        return render_template("editor.html", title='Редактор текста', simplified_text=simplified_text, input_text=input_text)
+    return render_template("editor.html", title='Редактор текста', simplified_text="", input_text="")
 
 @app.route('/simplifier', methods=["GET", "POST"])
 def simplifier():

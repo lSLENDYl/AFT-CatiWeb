@@ -59,12 +59,14 @@ body {
     font-size: 1rem;
     line-height: 1.5;
     resize: vertical;
+    transition: all 0.3s ease;
 }
 
 .text-input:focus {
     outline: none;
     border-color: #00837e;
     box-shadow: 0 0 5px rgba(0, 131, 126, 0.3);
+    backdrop-filter: blur(3px);
 }
 
 /* Окно вывода текста */
@@ -78,6 +80,14 @@ body {
     background-color: rgba(128, 128, 128, 0.1);
     font-size: 1rem;
     line-height: 1.5;
+    transition: all 0.3s ease;
+}
+
+.text-output:focus {
+    outline: none;
+    border-color: #00837e;
+    box-shadow: 0 0 5px rgba(0, 131, 126, 0.3);
+    backdrop-filter: blur(3px);
 }
 
 /* Кнопки на главной странице */
