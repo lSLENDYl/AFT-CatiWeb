@@ -1,7 +1,7 @@
 from app import app
 from app.forms import LoginForm
 from flask import render_template, flash, redirect, request
-import simplifierscript
+from app import simplifierscript
 
 @app.route('/')
 @app.route('/index')

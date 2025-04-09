@@ -1,16 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}ПРОСТО ТЕКСТ{% endblock %}
+{% block title %}Главная{% endblock %}
 
 {% block content %}
-    <!-- Основной контент -->
-    <div class="content">
-        <p>
-            Таким образом, повышение уровня гражданского сознания играет важную роль в формировании новых предложений. Не следует, однако, забывать о том, что сложившаяся структура организации создаёт предпосылки качественно новых шагов для экономической целесообразности принимаемых решений? Не следует, однако, забывать о том, что консультация с профессионалами из IT позволяет оценить значение всесторонне.
-        </p>
-        <div class="buttons">
-            <a href="{{ url_for('editor') }}" class="button">Редактор</a>
-            <a href="{{ url_for('simplifier') }}" class="button">Упроститель</a>
-        </div>
+<div class="container" style="
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+">
+    <h1 style="margin-bottom: 20px;">Добро пожаловать в ПРОСТО ТЕКСТ</h1>
+    <p style="margin-bottom: 30px;">Выберите инструмент для работы с текстом:</p>
+    <div class="buttons" style="display: flex; justify-content: center; gap: 20px;">
+        <a href="{{ url_for('editor') }}" class="button" style="background-color: rgba(230, 10, 120, 0.7); padding: 15px 25px;">Редактор</a>
+        <a href="{{ url_for('simplifier') }}" class="button" style="background-color: rgba(30, 52, 110, 0.7); padding: 15px 25px;">Упроститель</a>
     </div>
+</div>
 {% endblock %}
