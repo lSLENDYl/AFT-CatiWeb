@@ -41,8 +41,8 @@ body {
 
 /* Основной контент */
 .content {
-    max-width: 800px;
-    margin: 2rem auto;
+    /*max-width: 800px;*/
+    margin: 2rem 20%;
     padding: 0 1rem;
     padding-bottom: 100px; /* Отступ для футера */
 }
