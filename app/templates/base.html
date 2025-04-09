@@ -32,6 +32,7 @@
         .nav-buttons {
             display: flex;
             gap: 10px;
+            flex: 1;
         }
 
         .nav-buttons-left {
@@ -67,6 +68,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.3s ease;
+            margin-right: 20px;
         }
 
         .logo:hover {
@@ -171,16 +173,16 @@
     <div class="arrows-container"></div>
     <!-- Навигационная панель -->
     <div class="navbar">
+        <a href="{{ url_for('index') }}" class="logo" data-color="#1ddcbb">ПРОСТО ТЕКСТ</a>
         <div class="nav-buttons">
             <div class="nav-buttons-left">
-                <a href="{{ url_for('editor') }}" class="nav-button" data-color="#e60a78">Редактор</a>
-                <a href="{{ url_for('simplifier') }}" class="nav-button">Упроститель</a>
+                <a href="{{ url_for('editor') }}" class="nav-button" data-color="#e60a78">РЕДАКТОР</a>
+                <a href="{{ url_for('simplifier') }}" class="nav-button">УПРОСТИТЕЛЬ</a>
             </div>
             <div class="nav-buttons-right">
-                <a href="{{ url_for('help') }}" class="nav-button" data-color="#1e346e">Помощь</a>
+                <a href="{{ url_for('help') }}" class="nav-button" data-color="#1e346e">ПОМОЩЬ</a>
             </div>
         </div>
-        <a href="{{ url_for('index') }}" class="logo" data-color="#1ddcbb">ПРОСТО ТЕКСТ</a>
     </div>
 
     {% with messages = get_flashed_messages() %}
