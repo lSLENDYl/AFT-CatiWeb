@@ -1,6 +1,14 @@
+/* Общий шрифт */
+@font-face
+{
+    font-family: "Bezier Sans";
+    src: url(../fonts/Bezier_Sans_Regular.ttf);
+}
+
 /* Общие стили */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Bezier Sans';
+    /*font-family: Arial, sans-serif;*/
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
