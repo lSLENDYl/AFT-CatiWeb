@@ -18,20 +18,9 @@ def handle_space():
 
 @app.route('/process-text', methods=['POST'])
 def process_text():
-    from bs4 import BeautifulSoup
-
     input_html = request.get_json().get('text', '')
-    soup = BeautifulSoup(input_html, 'html.parser')
-
-    # Удаляем все теги кроме переносов
-    for tag in soup.find_all(True):
-        if tag.name not in ['br', 'p', 'div']:
-            tag.unwrap()
-
-    cleaned_text = str(soup)
-    simplified_text = editorscript.simplify_text(cleaned_text)
-
-    return jsonify({'simplified_text': simplified_text})
+    simplified_html = editorscript.simplify_text(input_html)
+    return jsonify({'simplified_text': simplified_html})
 
 @app.route('/')
 @app.route('/index')

@@ -13,12 +13,12 @@
                     <div class="text-output"
                          id="editableArea"
                          contenteditable="true"
-                         data-placeholder="Редактируйте текст здесь...">{{ simplified_text }}</div>
+                         data-placeholder="Введите текст здесь...">{{ simplified_text|safe }}</div>
                 {% else %}
                     <div class="text-input"
                          id="editableArea"
                          contenteditable="true"
-                         data-placeholder="Введите текст здесь...">{{ input_text }}</div>
+                         data-placeholder="Введите текст здесь...">{{ input_text|safe }}</div>
                 {% endif %}
                 <input type="hidden" id="hiddenInput" name="input_text">
             </div>
@@ -27,14 +27,73 @@
         </form>
     </div>
 
+    <div id="simplify-menu" class="context-menu">
+        <div class="menu-title">Упростить на:</div>
+        <div class="menu-item" id="simplify-option"></div>
+    </div>
+
     <script>
-        // Обработчик отправки формы
+        let currentSelectedWord = null;
+
+        // Обновление скрытого поля перед отправкой формы
         document.getElementById('mainForm').addEventListener('submit', function(e) {
             const editableDiv = document.getElementById('editableArea');
             document.getElementById('hiddenInput').value = editableDiv.innerHTML;
         });
 
-        // Обработчик пробела
+        // Обработчик клика по тексту
+        document.getElementById('editableArea').addEventListener('click', function(e) {
+            const target = e.target;
+            if (target.classList.contains('simplify-mark')) {
+                currentSelectedWord = target;
+                showContextMenu(target, e.clientX, e.clientY);
+                e.preventDefault();
+            }
+        });
+
+        // Показ контекстного меню
+        function showContextMenu(element, posX, posY) {
+            const menu = document.getElementById('simplify-menu');
+            const simpleVersion = element.dataset.simple;
+
+            document.getElementById('simplify-option').textContent = simpleVersion;
+
+            menu.style.display = 'block';
+            menu.style.left = `${posX}px`;
+            menu.style.top = `${posY}px`;
+        }
+
+        // Скрытие меню
+        function hideContextMenu() {
+            document.getElementById('simplify-menu').style.display = 'none';
+            currentSelectedWord = null;
+        }
+
+        // Обработчик выбора замены
+        document.getElementById('simplify-option').addEventListener('click', function() {
+            if (currentSelectedWord) {
+                const original = currentSelectedWord.dataset.original;
+                const simple = currentSelectedWord.dataset.simple;
+
+                // Замена содержимого
+                currentSelectedWord.outerHTML =
+                    `<span class="replaced-word"
+                          data-original="${original}"
+                          title="Упрощено из: ${original}">${simple}</span>`;
+
+                hideContextMenu();
+            }
+        });
+
+        // Скрытие меню при клике вне его
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.context-menu') &&
+                !e.target.closest('.simplify-mark')) {
+                hideContextMenu();
+            }
+        });
+
+        // Обработчик пробела для автоматического упрощения
         document.getElementById('editableArea').addEventListener('keydown', function(e) {
             if (e.key === ' ' || e.keyCode === 32) {
                 e.preventDefault();
@@ -45,7 +104,9 @@
                 fetch('/process-text', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({text: this.innerHTML})
+                    body: JSON.stringify({
+                        text: this.innerHTML
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {

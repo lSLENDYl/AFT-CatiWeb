@@ -285,8 +285,10 @@
             }
             
             // Создаем новую стрелочку каждые 3 секунды
-            setInterval(createArrow, 3000);
-            
+            setInterval(createArrow, 1000 + Math.random() * 9000);
+            setInterval(createArrow, 1000 + Math.random() * 9000);
+            setInterval(createArrow, 1000 + Math.random() * 9000);
+
             // Создаем начальные стрелочки
             for (let i = 0; i < 8; i++) {
                 createArrow();

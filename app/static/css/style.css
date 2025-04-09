@@ -69,6 +69,15 @@ body {
     line-height: 1.5;
     resize: vertical;
     transition: all 0.3s ease;
+    white-space: pre-wrap; /* Сохраняем переносы строк */
+    word-wrap: break-word; /* Перенос длинных слов */
+    overflow-wrap: break-word; /* Современный аналог word-wrap */
+    hyphens: auto; /* Автоматические переносы для длинных слов */
+}
+
+textarea::placeholder {
+    font-family: "Bezier Sans";
+    font-size: 1rem;
 }
 
 .text-input[data-placeholder]:empty::before {
@@ -124,11 +133,6 @@ footer {
     width: 100%;
 }
 
-span {
-    background-color: #12cca1;
-    background-clip: border-box;
-}
-
 @keyframes load {
     0%{
         opacity: 0.08;
@@ -145,4 +149,54 @@ span {
     margin: auto;
     animation: load 1.2s infinite 0s ease-in-out;
     animation-direction: alternate;
+}
+
+.simplify-mark {
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    background-color: #fff3cd;
+    border-bottom: 2px dashed #ffc107;
+    transition: all 0.2s;
+}
+
+.simplify-mark:hover {
+    background-color: #ffe69c;
+}
+
+/* Стили для заменённых слов */
+.replaced-word {
+    cursor: help;
+    background-color: #d4edda;
+    border-bottom: 2px solid #28a745;
+}
+
+/* Контекстное меню */
+.context-menu {
+    display: none;
+    position: fixed;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    padding: 8px 0;
+    min-width: 160px;
+}
+
+.menu-title {
+    padding: 8px 16px;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+    color: #666;
+}
+
+.menu-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.menu-item:hover {
+    background: #f5f5f5;
 }
