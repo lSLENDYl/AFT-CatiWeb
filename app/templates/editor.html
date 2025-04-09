@@ -9,18 +9,59 @@
         <p>Введите текст для редактирования:</p>
         <form method="POST">
             <div class="form-group">
-                <textarea class="text-input" id="input_text" placeholder="Введите ваш текст здесь..." name="input_text">{{ input_text }}</textarea>
+                {% if simplified_text %}
+                    <div>
+                        <textarea class="text-output" id="input_text" placeholder="Введите ваш текст здесь..." name="input_text">{{ simplified_text }}</textarea>
+                    </div>
+                {% else %}
+                    <textarea class="text-input" id="input_text" placeholder="Введите ваш текст здесь..." name="input_text">{{ input_text }}</textarea>
+                {% endif %}
             </div>
 
-            <div class="buttons">
-                <button type="submit" class="button">Упростить текст</button>
-            </div>
+            <div class="loading-indicator" id="loading">Обработка...</div>
         </form>
-        {% if simplified_text %}
-            <h2>Результат:</h2>
-            <div>
-                <textarea class="text-output" readonly>{{ simplified_text }}</textarea>
-            </div>
-        {% endif %}
     </div>
+    <script>
+        document.getElementById('input_text').addEventListener('keydown', function(e) {
+            if (e.key === ' ' || e.keyCode === 32) {
+                e.preventDefault(); // Блокируем стандартное поведение пробела
+
+                const textarea = this;
+                const currentText = textarea.value;
+                const cursorPos = textarea.selectionStart;
+
+                // Вставляем пробел вручную
+                const newText = currentText.slice(0, cursorPos) + ' ' + currentText.slice(cursorPos);
+                textarea.value = newText;
+
+                document.getElementById('loading').style.display = 'block';
+
+                // Отправляем запрос
+                fetch('/process-text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: newText
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    textarea.value = data.simplified_text;
+                    // Восстанавливаем позицию курсора
+                    textarea.selectionStart = cursorPos + 1;
+                    textarea.selectionEnd = cursorPos + 1;
+                })
+                .then(response => {
+                    document.getElementById('loading').style.display = 'none';
+                    return response.json();
+                })
+                .catch(error => {
+                    document.getElementById('loading').style.display = 'none';
+                    console.error('Error:', error);
+                });
+            }
+        });
+    </script>
 {% endblock %}

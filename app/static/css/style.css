@@ -137,3 +137,16 @@ footer {
     bottom: 0;
     width: 100%;
 }
+
+span {
+    background-color: #12cca1;
+    background-clip: border-box;
+}
+
+.loading-indicator {
+    display: none;
+    padding: 10px;
+    background: #00837e;
+    color: white;
+    border-radius: 4px;
+}
