@@ -17,6 +17,12 @@ client = OpenAI(
 # }
 
 def simplify_text(input_text):
+    from bs4 import BeautifulSoup
+
+    # Очистка HTML перед обработкой
+    soup = BeautifulSoup(input_text, 'html.parser')
+    plain_text = soup.get_text()
+
     response = client.responses.create(
         model="gpt-3.5-turbo",
         input=f"""Задача:
@@ -36,14 +42,19 @@ def simplify_text(input_text):
     )
 
     try:
+        print(input_text)
+        result_soup = BeautifulSoup(input_text, 'html.parser')
         simple = [i.split(" → ") for i in response.output_text.split("\n")]
         print(response.output_text)
         print(simple)
         for i in simple:
-            if i[0].strip() != "" and i[0] in input_text:
-                input_text = input_text.replace(i[0], i[1])
-        print(input_text)
-        return input_text
+            if i[0].strip() != "":
+                elements = result_soup.find_all(string=lambda text: i[0] in text)
+                for element in elements:
+                    new_text = element.replace(i[0], i[1])
+                    element.replace_with(new_text)
+
+        return str(result_soup)
     except Exception as e:
         return f"[Ошибка]: {str(e)}"
 

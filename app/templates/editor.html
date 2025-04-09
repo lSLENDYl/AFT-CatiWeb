@@ -5,61 +5,55 @@
 {% block content %}
     <div class="content">
         <h1>Редактор текста</h1>
-        <p>Это страница с редактором текста. Здесь вы можете редактировать и форматировать ваш текст по своему усмотрению.</p>
-        <p>Введите текст для редактирования:</p>
-        <form method="POST">
+        <p>Это страница с редактором текста. Здесь вы можете редактировать и форматировать ваш текст.</p>
+
+        <form method="POST" id="mainForm">
             <div class="form-group">
                 {% if simplified_text %}
-                    <div>
-                        <textarea class="text-output" id="input_text" placeholder="Введите ваш текст здесь..." name="input_text">{{ simplified_text }}</textarea>
-                    </div>
+                    <div class="text-output"
+                         id="editableArea"
+                         contenteditable="true"
+                         data-placeholder="Редактируйте текст здесь...">{{ simplified_text }}</div>
                 {% else %}
-                    <textarea class="text-input" id="input_text" placeholder="Введите ваш текст здесь..." name="input_text">{{ input_text }}</textarea>
+                    <div class="text-input"
+                         id="editableArea"
+                         contenteditable="true"
+                         data-placeholder="Введите текст здесь...">{{ input_text }}</div>
                 {% endif %}
+                <input type="hidden" id="hiddenInput" name="input_text">
             </div>
 
-            <div class="loading-indicator" id="loading">Обработка...</div>
+            <h2 class="animate" id="loading">Загрузка...</h2>
         </form>
     </div>
+
     <script>
-        document.getElementById('input_text').addEventListener('keydown', function(e) {
+        // Обработчик отправки формы
+        document.getElementById('mainForm').addEventListener('submit', function(e) {
+            const editableDiv = document.getElementById('editableArea');
+            document.getElementById('hiddenInput').value = editableDiv.innerHTML;
+        });
+
+        // Обработчик пробела
+        document.getElementById('editableArea').addEventListener('keydown', function(e) {
             if (e.key === ' ' || e.keyCode === 32) {
-                e.preventDefault(); // Блокируем стандартное поведение пробела
+                e.preventDefault();
+                document.execCommand('insertText', false, ' ');
 
-                const textarea = this;
-                const currentText = textarea.value;
-                const cursorPos = textarea.selectionStart;
+                document.getElementById('loading').style.display = 'flex';
 
-                // Вставляем пробел вручную
-                const newText = currentText.slice(0, cursorPos) + ' ' + currentText.slice(cursorPos);
-                textarea.value = newText;
-
-                document.getElementById('loading').style.display = 'block';
-
-                // Отправляем запрос
                 fetch('/process-text', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        text: newText
-                    })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text: this.innerHTML})
                 })
                 .then(response => response.json())
                 .then(data => {
-                    textarea.value = data.simplified_text;
-                    // Восстанавливаем позицию курсора
-                    textarea.selectionStart = cursorPos + 1;
-                    textarea.selectionEnd = cursorPos + 1;
+                    this.innerHTML = data.simplified_text;
                 })
-                .then(response => {
+                .catch(error => console.error('Error:', error))
+                .finally(() => {
                     document.getElementById('loading').style.display = 'none';
-                    return response.json();
-                })
-                .catch(error => {
-                    document.getElementById('loading').style.display = 'none';
-                    console.error('Error:', error);
                 });
             }
         });

@@ -56,7 +56,8 @@ body {
 }
 
 /* Окно ввода текста */
-.text-input {
+/* Стили для contenteditable */
+.text-input, .text-output {
     width: 100%;
     min-height: 200px;
     padding: 1rem;
@@ -70,28 +71,13 @@ body {
     transition: all 0.3s ease;
 }
 
-.text-input:focus {
-    outline: none;
-    border-color: #00837e;
-    box-shadow: 0 0 5px rgba(0, 131, 126, 0.3);
-    backdrop-filter: blur(3px);
+.text-input[data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: #999;
+    cursor: text;
 }
 
-/* Окно вывода текста */
-.text-output {
-    width: 100%;
-    min-height: 200px;
-    padding: 1rem;
-    margin: 1rem 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: rgba(128, 128, 128, 0.1);
-    font-size: 1rem;
-    line-height: 1.5;
-    transition: all 0.3s ease;
-}
-
-.text-output:focus {
+.text-input:focus, .text-output:focus {
     outline: none;
     border-color: #00837e;
     box-shadow: 0 0 5px rgba(0, 131, 126, 0.3);
@@ -143,10 +129,20 @@ span {
     background-clip: border-box;
 }
 
-.loading-indicator {
+@keyframes load {
+    0%{
+        opacity: 0.08;
+        filter: blur(5px);
+        letter-spacing: 3px;
+    }
+}
+
+.animate {
     display: none;
-    padding: 10px;
-    background: #00837e;
-    color: white;
-    border-radius: 4px;
+    justify-content: center;
+    align-items: center;
+    height:100%;
+    margin: auto;
+    animation: load 1.2s infinite 0s ease-in-out;
+    animation-direction: alternate;
 }
