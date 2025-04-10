@@ -94,26 +94,40 @@
         });
 
         // Обработчик пробела для автоматического упрощения
+        let lastSentText = "";
+        let isProcessing = false;
+
         document.getElementById('editableArea').addEventListener('keydown', function(e) {
-            if (e.key === ' ' || e.keyCode === 32) {
-                e.preventDefault();
-                document.execCommand('insertText', false, ' ');
+            if (e.key === ' ' && !isProcessing) {
+                isProcessing = true;
+                const currentText = this.innerHTML;
+                lastSentText = currentText;
 
                 document.getElementById('loading').style.display = 'flex';
 
                 fetch('/process-text', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        text: this.innerHTML
-                    })
+                    body: JSON.stringify({ text: currentText })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    this.innerHTML = data.simplified_text;
+                    const currentUserText = this.innerHTML;
+
+                    // Если текст не менялся - просто подставляем результат
+                    if (currentUserText === lastSentText) {
+                        this.innerHTML = data.simplified_text;
+                    }
+                    // Если текст изменился - находим разницу и объединяем
+                    else {
+                        const processedPart = data.simplified_text;
+                        const newUserText = currentUserText.replace(lastSentText, '');
+                        this.innerHTML = processedPart + newUserText;
+                    }
                 })
                 .catch(error => console.error('Error:', error))
                 .finally(() => {
+                    isProcessing = false;
                     document.getElementById('loading').style.display = 'none';
                 });
             }
