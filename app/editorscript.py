@@ -47,6 +47,8 @@ def simplify_text(input_text):
                 original, simple = line.split("→", 1)
                 replacements.append((original.strip(), simple.strip()))
 
+        print(replacements)
+
         # Заменяем слова с сохранением HTML-структуры
         for original, simple in replacements:
             for element in soup.find_all(string=lambda text: original in text):

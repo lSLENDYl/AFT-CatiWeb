@@ -16,11 +16,28 @@ def handle_space():
     return jsonify({'status': 'empty'})
 
 
+latest_texts = {}
+
+
 @app.route('/process-text', methods=['POST'])
 def process_text():
-    input_html = request.get_json().get('text', '')
+    data = request.get_json()
+    input_html = data.get('text', '')
+    client_version = data.get('version', 0)
+
+    # Сохраняем последнюю версию текста
+    latest_texts[client_version] = input_html
+
     simplified_html = editorscript.simplify_text(input_html)
-    return jsonify({'simplified_text': simplified_html})
+
+    # Проверяем актуальность версии
+    if latest_texts.get(client_version) == input_html:
+        return jsonify({
+            'simplified_text': simplified_html,
+            'version': client_version
+        })
+    else:
+        return jsonify({'status': 'outdated'})
 
 @app.route('/')
 @app.route('/index')
