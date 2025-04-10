@@ -1,5 +1,11 @@
+autocorrect
+bs4
+collections
 flask
-SpeechRecognition
-pyAudio
+flask_wtf
 librosa
+openai
+pyAudio
+SpeechRecognition
 wave
+wtforms
