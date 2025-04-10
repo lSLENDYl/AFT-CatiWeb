@@ -2,42 +2,34 @@ from app import app
 from app.forms import LoginForm
 from flask import render_template, flash, redirect, request, jsonify
 from app import simplifierscript, editorscript
+from collections import deque
+from bs4 import BeautifulSoup
 
-latest_text = ""
+text_versions = deque(maxlen=10)  # Храним последние 10 версий текста
+current_version = 0
 
 @app.route('/handle-space', methods=['POST'])
 def handle_space():
-    global latest_text
+    global current_version
     data = request.get_json()
-    if data.get('text', '').strip() != latest_text.strip():
-        latest_text = data.get('text', '')
-        editor(latest_text)
-        return jsonify({'status': 'success'})
-    return jsonify({'status': 'empty'})
-
-
-latest_texts = {}
+    text_versions.append((current_version, data.get('text', '')))
+    current_version += 1
+    return jsonify({'status': 'success', 'version': current_version})
 
 
 @app.route('/process-text', methods=['POST'])
 def process_text():
     data = request.get_json()
     input_html = data.get('text', '')
-    client_version = data.get('version', 0)
 
-    # Сохраняем последнюю версию текста
-    latest_texts[client_version] = input_html
+    # Передаём исходный HTML с метками
+    simplified_html, pairs = editorscript.simplify_text(input_html)
 
-    simplified_html = editorscript.simplify_text(input_html)
-
-    # Проверяем актуальность версии
-    if latest_texts.get(client_version) == input_html:
-        return jsonify({
-            'simplified_text': simplified_html,
-            'version': client_version
-        })
-    else:
-        return jsonify({'status': 'outdated'})
+    return jsonify({
+        'simplified_text': simplified_html,
+        'replacements': pairs,
+        'version': current_version
+    })
 
 @app.route('/')
 @app.route('/index')

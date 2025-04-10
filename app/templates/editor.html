@@ -3,134 +3,145 @@
 {% block title %}Редактор текста{% endblock %}
 
 {% block content %}
-    <div class="content">
-        <h1>Редактор текста</h1>
-        <p>Это страница с редактором текста. Здесь вы можете редактировать и форматировать ваш текст.</p>
+<div class="content">
+    <h1>Редактор текста</h1>
+    <p>Это страница с редактором текста. Здесь вы можете редактировать и форматировать ваш текст.</p>
 
-        <form method="POST" id="mainForm">
-            <div class="form-group">
-                {% if simplified_text %}
-                    <div class="text-output"
-                         id="editableArea"
-                         contenteditable="true"
-                         data-placeholder="Введите текст здесь...">{{ simplified_text|safe }}</div>
-                {% else %}
-                    <div class="text-input"
-                         id="editableArea"
-                         contenteditable="true"
-                         data-placeholder="Введите текст здесь...">{{ input_text|safe }}</div>
-                {% endif %}
-                <input type="hidden" id="hiddenInput" name="input_text">
-            </div>
+    <form method="POST" id="mainForm">
+        <div class="form-group">
+            <div class="text-output"
+                 id="editableArea"
+                 contenteditable="true"
+                 data-placeholder="Введите текст здесь...">{{ simplified_text or input_text }}</div>
+            <input type="hidden" id="hiddenInput" name="input_text">
+        </div>
 
-            <h2 class="animate" id="loading">Загрузка...</h2>
-        </form>
-    </div>
+        <h2 class="animate" id="loading">Загрузка...</h2>
+    </form>
+</div>
 
-    <div id="simplify-menu" class="context-menu">
-        <div class="menu-title">Упростить на:</div>
-        <div class="menu-item" id="simplify-option"></div>
-    </div>
+<div id="simplify-menu" class="context-menu">
+    <div class="menu-title">Упростить на:</div>
+    <div class="menu-item" id="simplify-option"></div>
+</div>
 
-    <script>
-        let currentSelectedWord = null;
+<script>
+    let currentMarkedElement = null;
 
-        // Обновление скрытого поля перед отправкой формы
-        document.getElementById('mainForm').addEventListener('submit', function(e) {
-            const editableDiv = document.getElementById('editableArea');
-            document.getElementById('hiddenInput').value = editableDiv.innerHTML;
-        });
-
-        // Обработчик клика по тексту
-        document.getElementById('editableArea').addEventListener('click', function(e) {
-            const target = e.target;
-            if (target.classList.contains('simplify-mark')) {
-                currentSelectedWord = target;
-                showContextMenu(target, e.clientX, e.clientY);
-                e.preventDefault();
-            }
-        });
-
-        // Показ контекстного меню
-        function showContextMenu(element, posX, posY) {
-            const menu = document.getElementById('simplify-menu');
-            const simpleVersion = element.dataset.simple;
-
-            document.getElementById('simplify-option').textContent = simpleVersion;
-
-            menu.style.display = 'block';
-            menu.style.left = `${posX}px`;
-            menu.style.top = `${posY}px`;
+    document.getElementById('editableArea').addEventListener('click', (e) => {
+        const mark = e.target.closest('.simplify-mark');
+        if (mark) {
+            currentMarkedElement = mark;
+            showSimplifyMenu(mark);
+            e.preventDefault();
         }
+    });
 
-        // Скрытие меню
-        function hideContextMenu() {
-            document.getElementById('simplify-menu').style.display = 'none';
-            currentSelectedWord = null;
+    function showSimplifyMenu(element) {
+        const menu = document.getElementById('simplify-menu');
+        const simpleText = element.dataset.simple;
+
+        document.getElementById('simplify-option').textContent = simpleText;
+
+        const rect = element.getBoundingClientRect();
+        menu.style.display = 'block';
+        menu.style.left = `${rect.left}px`;
+        menu.style.top = `${rect.bottom + 5}px`;
+    }
+
+    document.getElementById('simplify-option').addEventListener('click', () => {
+        if (currentMarkedElement) {
+            const original = currentMarkedElement.dataset.original;
+            const simple = currentMarkedElement.dataset.simple;
+
+            currentMarkedElement.outerHTML =
+                `<span class="replaced-word"
+                      data-original="${original}"
+                      title="Упрощено из: ${original}">${simple}</span>`;
+
+            hideMenu();
         }
+    });
 
-        // Обработчик выбора замены
-        document.getElementById('simplify-option').addEventListener('click', function() {
-            if (currentSelectedWord) {
-                const original = currentSelectedWord.dataset.original;
-                const simple = currentSelectedWord.dataset.simple;
+    function hideMenu() {
+        document.getElementById('simplify-menu').style.display = 'none';
+        currentMarkedElement = null;
+    }
 
-                // Замена содержимого
-                currentSelectedWord.outerHTML =
-                    `<span class="replaced-word"
-                          data-original="${original}"
-                          title="Упрощено из: ${original}">${simple}</span>`;
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.simplify-mark') &&
+            !e.target.closest('#simplify-menu')) {
+            hideMenu();
+        }
+    });
 
-                hideContextMenu();
-            }
-        });
+    document.getElementById('mainForm').addEventListener('submit', function(e) {
+        const editableDiv = document.getElementById('editableArea');
+        document.getElementById('hiddenInput').value = editableDiv.innerHTML;
+    });
 
-        // Скрытие меню при клике вне его
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.context-menu') &&
-                !e.target.closest('.simplify-mark')) {
-                hideContextMenu();
-            }
-        });
+    // === Главное: обработка пробела ===
+    document.getElementById('editableArea').addEventListener('keydown', function(e) {
+        if (e.key === ' ') {
+            e.preventDefault();
 
-        // Обработчик пробела для автоматического упрощения
-        let lastSentText = "";
-        let isProcessing = false;
+            const editableDiv = this;
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
 
-        document.getElementById('editableArea').addEventListener('keydown', function(e) {
-            if (e.key === ' ' && !isProcessing) {
-                isProcessing = true;
-                const currentText = this.innerHTML;
-                lastSentText = currentText;
+            // Вставляем пробел вручную
+            document.execCommand('insertText', false, ' ');
 
-                document.getElementById('loading').style.display = 'flex';
+            // Сохраняем позицию курсора
+            const cursorPosition = range.endOffset;
 
-                fetch('/process-text', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ text: currentText })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const currentUserText = this.innerHTML;
+            // Получаем полный HTML и текст ДО курсора
+            const fullHTMLBefore = editableDiv.innerHTML;
+            const fullTextBefore = editableDiv.innerText;
 
-                    // Если текст не менялся - просто подставляем результат
-                    if (currentUserText === lastSentText) {
-                        this.innerHTML = data.simplified_text;
-                    }
-                    // Если текст изменился - находим разницу и объединяем
-                    else {
-                        const processedPart = data.simplified_text;
-                        const newUserText = currentUserText.replace(lastSentText, '');
-                        this.innerHTML = processedPart + newUserText;
-                    }
-                })
-                .catch(error => console.error('Error:', error))
-                .finally(() => {
-                    isProcessing = false;
-                    document.getElementById('loading').style.display = 'none';
-                });
-            }
-        });
-    </script>
+            // Создаём временный контейнер и получаем текст до курсора
+            const tempRange = document.createRange();
+            tempRange.selectNodeContents(editableDiv);
+            tempRange.setEnd(range.endContainer, range.endOffset);
+
+            const container = document.createElement("div");
+            container.appendChild(tempRange.cloneContents());
+            const htmlBeforeCursor = container.innerHTML;
+
+            document.getElementById('loading').style.display = 'flex';
+
+            fetch('/process-text', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: htmlBeforeCursor})
+            })
+            .then(response => response.json())
+            .then(data => {
+                const parser = new DOMParser();
+                const processedHTML = parser.parseFromString(data.simplified_text, 'text/html').body.innerHTML;
+
+                // Заменяем только часть до курсора, остальное сохраняем
+                const fullCurrentHTML = editableDiv.innerHTML;
+                const indexOfSentPart = fullCurrentHTML.indexOf(htmlBeforeCursor);
+                if (indexOfSentPart !== -1) {
+                    const before = fullCurrentHTML.slice(0, indexOfSentPart);
+                    const after = fullCurrentHTML.slice(indexOfSentPart + htmlBeforeCursor.length);
+                    editableDiv.innerHTML = before + processedHTML + after;
+
+                    // Ставим курсор в конец
+                    const range = document.createRange();
+                    range.selectNodeContents(editableDiv);
+                    range.collapse(false);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            })
+            .catch(err => console.error('Ошибка:', err))
+            .finally(() => {
+                document.getElementById('loading').style.display = 'none';
+            });
+        }
+    });
+</script>
 {% endblock %}

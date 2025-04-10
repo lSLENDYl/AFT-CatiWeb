@@ -1,114 +1,53 @@
-# import os
-# import requests
 from openai import OpenAI
+from bs4 import BeautifulSoup
 
 client = OpenAI(
     api_key="sk-tfFJUW6ns45XWgBD9IAKpdhPUkSVcDHb",
     base_url="https://api.proxyapi.ru/openai/v1",
 )
 
-# API_KEY = os.environ["API_KEY"]
-#
-# url = "https://api.intelligence.io.solutions/api/v1/chat/completions"
-#
-# headers = {
-#     "Content-Type": "application/json",
-#     "Authorization": f"Bearer {API_KEY}"
-# }
 
-def simplify_text(input_text):
-    from bs4 import BeautifulSoup
-
+def simplify_text(input_html):
     try:
-        soup = BeautifulSoup(input_text, 'html.parser')
-        plain_text = soup.get_text()
+        soup = BeautifulSoup(input_html, 'html.parser')
+
+        # Игнорировать текст в уже заменённых участках
+        elements = soup.find_all(text=True)
+        filtered_text = ' '.join([
+            el.strip() for el in elements
+            if not el.find_parents(class_=["replaced-word", "simplify-mark"])
+        ])
 
         response = client.responses.create(
             model="gpt-3.5-turbo",
-            input=f"""Задача:
-Найди в тексте сложные слова и формулировки и выведи в виде списка их упрощения следуя контексту и их самих.
-
-Дополнительные условия:
-Без воды, лишнего текста и информации. Только сухой ответ следуя формату.
-Упрощения должны быть написаны так, чтобы их можно было подставить в текст сразу, без изменения вручную.
+            input=f"""Найди сложные слова или фразы и упрости их по контексту.
 
 Формат:
-слово или формулировка (полностью так же как и в данном тексте) → упрощение
-слово или формулировка (полностью так же как и в данном тексте) → упрощение
-слово или формулировка (полностью так же как и в данном тексте) → упрощение
+оригинал → упрощение
 
 Текст:
-{input_text}"""
+{filtered_text}"""
         )
 
-        replacements = []
+        simplified_pairs = []
         for line in response.output_text.split("\n"):
             if "→" in line:
-                original, simple = line.split("→", 1)
-                replacements.append((original.strip(), simple.strip()))
+                parts = line.split("→")
+                original = parts[0].strip()
+                simple = parts[1].strip()
+                simplified_pairs.append([original, simple])
 
-        print(replacements)
+        # Вставка меток
+        for original, simple in simplified_pairs:
+            for el in soup.find_all(text=True):
+                if original in el and not el.find_parents(class_=["replaced-word", "simplify-mark"]):
+                    new_html = str(el).replace(
+                        original,
+                        f'<span class="simplify-mark" data-original="{original}" data-simple="{simple}">{original}</span>'
+                    )
+                    el.replace_with(BeautifulSoup(new_html, 'html.parser'))
 
-        # Заменяем слова с сохранением HTML-структуры
-        for original, simple in replacements:
-            for element in soup.find_all(string=lambda text: original in text):
-                new_tag = soup.new_tag("span")
-                new_tag.attrs = {
-                    "class": "simplify-mark",
-                    "data-original": original,
-                    "data-simple": simple
-                }
-                new_tag.string = original
-                element.replace_with(new_tag)
-
-        return str(soup)
+        return str(soup), simplified_pairs
 
     except Exception as e:
-        return f"[Ошибка]: {str(e)}"
-
-
-
-
-
-
-
-#     data = {
-#         "model": "deepseek-ai/DeepSeek-R1",
-#         "messages": [
-#             {
-#                 "role": "system",
-#                 "content": "You are a helpful assistant."
-#             },
-#             {
-#                 "role": "user",
-#                 "content": f"""Задача:
-# Найди в тексте сложные слова и формулировки и выведи в виде списка их упрощения следуя контексту и их самих.
-#
-# Дополнительные условия:
-# Без воды, лишнего текста и информации. Только сухой ответ следуя формату.
-# Упрощения должны быть написаны так, чтобы их можно было подставить в текст сразу, без изменения вручную.
-# В конце выведи текст с изменёнными формулировками и словами, которые ты сгенерировал.
-#
-# Формат:
-# слово или формулировка → упрощение
-# слово или формулировка → упрощение
-# слово или формулировка → упрощение
-#
-# Текст:
-# {input_text}"""
-#             }
-#         ]
-#     }
-
-    # pprint(data)
-    #
-    # try:
-    #     response = requests.post(url, headers=headers, json=data)
-    #     data = response.json()
-    #     print("\n\n\n\n\n\n\n")
-    #     pprint(data)
-    #
-    #     text = data['choices'][0]['message']['content']
-    #     return text.split('</think>\n\n')[1]
-    # except Exception as e:
-    #     return f"[Ошибка]: {str(e)}"
+        return f"[Ошибка]: {str(e)}", []
