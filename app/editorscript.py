@@ -1,13 +1,29 @@
+# import os
+# import requests
 from openai import OpenAI
 from bs4 import BeautifulSoup
+from app.config import API_KEY
+from autocorrect import Speller
+
 
 client = OpenAI(
     api_key="sk-tfFJUW6ns45XWgBD9IAKpdhPUkSVcDHb",
     base_url="https://api.proxyapi.ru/openai/v1",
 )
 
+# API_KEY = os.environ["API_KEY"]
+#
+# url = "https://api.intelligence.io.solutions/api/v1/chat/completions"
+#
+# headers = {
+#     "Content-Type": "application/json",
+#     "Authorization": f"Bearer {API_KEY}"
+# }
+
+spell = Speller("ru")
 
 def simplify_text(input_html):
+    input_html = spell(input_html)
     try:
         soup = BeautifulSoup(input_html, 'html.parser')
 

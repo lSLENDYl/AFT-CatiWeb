@@ -1,8 +1,7 @@
 import os
 import requests
-from config import API_KEY
+from app.config import API_KEY
 
-# API_KEY = os.environ["API_KEY"]
 
 url = "https://api.intelligence.io.solutions/api/v1/chat/completions"
 
