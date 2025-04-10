@@ -20,9 +20,11 @@
     </form>
 </div>
 
+<!-- Контекстное меню с множеством вариантов -->
 <div id="simplify-menu" class="context-menu">
     <div class="menu-title">Заменить на:</div>
-    <div class="menu-item" id="simplify-option"></div>
+    <div id="simplify-options"></div>
+    <div class="menu-item" style="color: red;" id="skip-option">Не изменять</div>
 </div>
 
 <script>
@@ -39,9 +41,26 @@
 
     function showSimplifyMenu(element) {
         const menu = document.getElementById('simplify-menu');
-        const simpleText = element.dataset.simple;
+        const optionsContainer = document.getElementById('simplify-options');
+        optionsContainer.innerHTML = '';
 
-        document.getElementById('simplify-option').textContent = simpleText;
+        const options = element.dataset.options.split(',');
+
+        options.forEach(option => {
+            const item = document.createElement('div');
+            item.classList.add('menu-item');
+            item.textContent = option.trim();
+            item.addEventListener('click', () => {
+                replaceWithOption(option.trim());
+            });
+            optionsContainer.appendChild(item);
+        });
+
+        document.getElementById('skip-option').onclick = () => {
+            const original = element.dataset.original;
+            element.outerHTML = `<span class="replaced-word" title="Оставлено без изменений">${original}</span>`;
+            hideMenu();
+        };
 
         const rect = element.getBoundingClientRect();
         menu.style.display = 'block';
@@ -49,19 +68,17 @@
         menu.style.top = `${rect.bottom + 5}px`;
     }
 
-    document.getElementById('simplify-option').addEventListener('click', () => {
+    function replaceWithOption(optionText) {
         if (currentMarkedElement) {
             const original = currentMarkedElement.dataset.original;
-            const simple = currentMarkedElement.dataset.simple;
 
             currentMarkedElement.outerHTML =
                 `<span class="replaced-word"
                       data-original="${original}"
-                      title="Заменено из: ${original}">${simple}</span>`;
-
+                      title="Заменено из: ${original}">${optionText}</span>`;
             hideMenu();
         }
-    });
+    }
 
     function hideMenu() {
         document.getElementById('simplify-menu').style.display = 'none';
@@ -85,12 +102,9 @@
             e.preventDefault();
             const editableDiv = this;
 
-            // Вставляем пробел вручную
             document.execCommand('insertText', false, ' ');
 
-            // Сохраняем HTML до запроса
             const htmlBefore = editableDiv.innerHTML;
-
             document.getElementById('loading').style.display = 'flex';
 
             fetch('/process-text', {
@@ -104,7 +118,6 @@
                 const newDoc = parser.parseFromString(data.simplified_text, 'text/html');
                 const newHTML = newDoc.body.innerHTML;
 
-                // Переносим уже заменённые элементы
                 const replaced = [...editableDiv.querySelectorAll('.replaced-word')];
                 replaced.forEach(el => {
                     const match = newDoc.body.querySelector(`[data-original="${el.dataset.original}"]`);
@@ -113,7 +126,6 @@
 
                 editableDiv.innerHTML = newDoc.body.innerHTML;
 
-                // Восстановить курсор
                 const range = document.createRange();
                 const sel = window.getSelection();
                 range.selectNodeContents(editableDiv);

@@ -9,8 +9,6 @@ client = OpenAI(
     base_url="https://api.proxyapi.ru/openai/v1",
 )
 
-API_KEY = os.environ["API_KEY"]
-
 spell = Speller("ru")
 
 def simplify_text(input_html):
@@ -25,24 +23,25 @@ def simplify_text(input_html):
             if not el.find_parents(class_=["replaced-word", "simplify-mark"])
         ])
 
-        response = client.responses.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            input=f"""Найди сложные слова или фразы и упрости их по контексту.
+            messages=[
+                {"role": "user", "content": f"""Найди сложные слова или фразы и упрости их по контексту. Для каждого элемента предложи до 3 вариантов упрощения. Формат:
 
-Формат:
-оригинал → упрощение
+сложно → [упрощение1, упрощение2, упрощение3]
 
 Текст:
-{filtered_text}"""
+{filtered_text}"""}
+            ]
         )
 
         simplified_pairs = []
-        for line in response.output_text.split("\n"):
+        for line in response.choices[0].message.content.split("\n"):
             if "→" in line:
-                parts = line.split("→")
-                original = parts[0].strip()
-                simple = parts[1].strip()
-                simplified_pairs.append([original, simple])
+                original, simple_variants = line.split("→")
+                original = original.strip()
+                variants = [v.strip() for v in simple_variants.strip(" []").split(",")]
+                simplified_pairs.append([original, variants])
 
         # Вставка меток
         for original, simple in simplified_pairs:
@@ -50,7 +49,8 @@ def simplify_text(input_html):
                 if original in el and not el.find_parents(class_=["replaced-word", "simplify-mark"]):
                     new_html = str(el).replace(
                         original,
-                        f'<span class="simplify-mark" data-original="{original}" data-simple="{simple}">{original}</span>'
+                        f'<span class="simplify-mark" data-original="{original}" data-options="{",".join(variants)}">{original}</span>'
+
                     )
                     el.replace_with(BeautifulSoup(new_html, 'html.parser'))
 
