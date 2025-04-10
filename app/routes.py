@@ -3,7 +3,6 @@ from app.forms import LoginForm
 from flask import render_template, flash, redirect, request, jsonify
 from app import simplifierscript, editorscript
 from collections import deque
-from bs4 import BeautifulSoup
 
 text_versions = deque(maxlen=10)  # Храним последние 10 версий текста
 current_version = 0

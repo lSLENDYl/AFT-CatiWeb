@@ -1,8 +1,6 @@
-# import os
-# import requests
+import os
 from openai import OpenAI
 from bs4 import BeautifulSoup
-from app.config import API_KEY
 from autocorrect import Speller
 
 
@@ -11,14 +9,7 @@ client = OpenAI(
     base_url="https://api.proxyapi.ru/openai/v1",
 )
 
-# API_KEY = os.environ["API_KEY"]
-#
-# url = "https://api.intelligence.io.solutions/api/v1/chat/completions"
-#
-# headers = {
-#     "Content-Type": "application/json",
-#     "Authorization": f"Bearer {API_KEY}"
-# }
+API_KEY = os.environ["API_KEY"]
 
 spell = Speller("ru")
 
