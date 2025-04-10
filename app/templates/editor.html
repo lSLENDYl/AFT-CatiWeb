@@ -119,4 +119,42 @@
             }
         });
     </script>
+
+    <style>
+        .text-input {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #f7ea6f;
+        }
+
+        .text-input::selection {
+            background-color: #f7ea6f;
+            color: #000;
+        }
+
+        .text-input::-moz-selection {
+            background-color: #f7ea6f;
+            color: #000;
+        }
+
+        .text-input::-webkit-selection {
+            background-color: #f7ea6f;
+            color: #000;
+        }
+
+        .text-input::-ms-selection {
+            background-color: #f7ea6f;
+            color: #000;
+        }
+    </style>
 {% endblock %}

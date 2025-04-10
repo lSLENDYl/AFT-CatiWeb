@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+      <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css">
     <title>{% block title %}ПРОСТО ТЕКСТ{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
@@ -41,6 +43,7 @@
         .nav-buttons-left {
             display: flex;
             gap: 10px;
+            margin-top: 5px;
         }
 
         .nav-buttons-right {
@@ -94,8 +97,8 @@
             color: white;
             flex: 1;
             padding: 20px;
-            margin-top: 70px; /* Отступ для navbar */
-            margin-bottom: 70px; /* Отступ для footer */
+            margin-top: 70px;
+            margin-bottom: 60px;
         }
 
         .arrows-container {
@@ -173,6 +176,86 @@
             transition: background-color 0.5s ease;
             box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
         }
+
+        .simplify-button:hover {
+            box-shadow: 0 0 20px rgba(140, 215, 27, 0.9);
+        }
+
+        /* Стили для кнопки "Упростить текст" */
+        .button {
+            background-color: #7bfe00;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(123, 254, 0, 0.7);
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(123, 254, 0, 0.9);
+        }
+
+        .burger-menu {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 21px;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .burger-menu span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background-color: white;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #8102cd;
+            z-index: 4;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            transition: background-color 0.5s ease;
+        }
+
+        .mobile-menu.active {
+            display: flex;
+        }
+
+        .mobile-menu .nav-button {
+            font-size: 24px;
+            padding: 15px 25px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-buttons {
+                display: none;
+            }
+
+            .burger-menu {
+                display: flex;
+            }
+
+            .navbar {
+                padding: 15px 20px;
+            }
+        }
     </style>
   </head>
   <body>
@@ -184,12 +267,24 @@
         <div class="nav-buttons">
             <div class="nav-buttons-left">
                 <a href="{{ url_for('editor') }}" class="nav-button" data-color="#e60a78">Редактор</a>
-                <a href="{{ url_for('simplifier') }}" class="nav-button" data-color="#53c72a">Упроститель</a>
+                <a href="{{ url_for('simplifier') }}" class="nav-button" data-color="#12cca1">Упроститель</a>
             </div>
             <div class="nav-buttons-right">
-                <a href="{{ url_for('help') }}" class="nav-button" data-color="#1e346e">Помощь</a>
+                <a href="{{ url_for('help') }}" class="nav-button" data-color="#1e346e"><i class="fa-solid fa-location-question" style="font-size: 28px;"></i></a>
             </div>
         </div>
+        <div class="burger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+    <div class="mobile-menu">
+        <a href="{{ url_for('index') }}" class="nav-button" data-color="#1ddcbb">Главная</a>
+        <a href="{{ url_for('editor') }}" class="nav-button" data-color="#e60a78">Редактор</a>
+        <a href="{{ url_for('simplifier') }}" class="nav-button" data-color="#12cca1">Упроститель</a>
+        <a href="{{ url_for('help') }}" class="nav-button" data-color="#1e346e">Помощь</a>
     </div>
 
     {% with messages = get_flashed_messages() %}
@@ -206,22 +301,13 @@
 
     <!-- Футер -->
     <footer>
-        &copy; 2077 ПРОСТО ТЕКСТ. Все права не защищены.
+        &copy; 2023 ПРОСТО ТЕКСТ. Все права защищены.
     </footer>
 
     <script>
         // Добавляем эффект пульсации для фона
         document.addEventListener('DOMContentLoaded', function() {
             const background = document.querySelector('.background');
-            const navbar = document.querySelector('.navbar');
-            const footer = document.querySelector('footer');
-            const navButtons = document.querySelectorAll('.nav-button, .logo');
-            
-            // Получаем сохраненный цвет из localStorage или используем цвет по умолчанию
-            const savedColor = localStorage.getItem('navbarColor') || '#8102cd';
-            navbar.style.background = savedColor;
-            footer.style.background = savedColor;
-
             let scale = 1;
             let direction = 0.0005;
 
@@ -294,22 +380,105 @@
                 createArrow();
             }
 
-            // Добавляем эффект изменения цвета навигационной панели и футера
+            // Определяем текущую страницу
+            const currentPath = window.location.pathname;
+            let activeColor = '#8102cd'; // Цвет по умолчанию
+
+            // Сопоставляем пути с цветами
+            const pathColors = {
+                '/': '#1ddcbb',
+                '/editor': '#e60a78',
+                '/simplifier': '#12cca1',
+                '/help': '#1e346e'
+            };
+
+            // Находим цвет для текущей страницы
+            for (const [path, color] of Object.entries(pathColors)) {
+                if (currentPath === path) {
+                    activeColor = color;
+                    break;
+                }
+            }
+
+            // Применяем цвет к навбару и футеру
+            const navbar = document.querySelector('.navbar');
+            const footer = document.querySelector('footer');
+            const mobileMenu = document.querySelector('.mobile-menu');
+
+            // Устанавливаем цвет только если это не главная страница
+            if (currentPath !== '/') {
+                navbar.style.backgroundColor = activeColor;
+                footer.style.backgroundColor = activeColor;
+                if (mobileMenu) {
+                    mobileMenu.style.backgroundColor = activeColor;
+                }
+            }
+
+            // Добавляем эффект изменения цвета при наведении
+            const navButtons = document.querySelectorAll('.nav-button, .logo');
+            
             navButtons.forEach(button => {
                 const color = button.getAttribute('data-color');
                 if (color) {
                     button.addEventListener('mouseenter', () => {
                         navbar.style.background = color;
                         footer.style.background = color;
-                        // Сохраняем выбранный цвет в localStorage
-                        localStorage.setItem('navbarColor', color);
                     });
 
                     button.addEventListener('mouseleave', () => {
-                        navbar.style.background = savedColor;
-                        footer.style.background = savedColor;
+                        navbar.style.background = activeColor;
+                        footer.style.background = activeColor;
                     });
                 }
+            });
+
+            // Обработчик для мобильного меню
+            if (mobileMenu) {
+                mobileMenu.querySelectorAll('.nav-button').forEach(button => {
+                    const color = button.getAttribute('data-color');
+                    if (color) {
+                        button.addEventListener('mouseenter', () => {
+                            mobileMenu.style.background = color;
+                        });
+
+                        button.addEventListener('mouseleave', () => {
+                            mobileMenu.style.background = activeColor;
+                        });
+                    }
+                });
+            }
+
+            // Добавляем обработчик для бургер-меню
+            const burgerMenu = document.querySelector('.burger-menu');
+            const burgerSpans = burgerMenu.querySelectorAll('span');
+
+            burgerMenu.addEventListener('click', function() {
+                mobileMenu.classList.toggle('active');
+                burgerSpans.forEach((span, index) => {
+                    if (mobileMenu.classList.contains('active')) {
+                        if (index === 0) {
+                            span.style.transform = 'rotate(45deg) translate(5px, 5px)';
+                        } else if (index === 1) {
+                            span.style.opacity = '0';
+                        } else {
+                            span.style.transform = 'rotate(-45deg) translate(7px, -6px)';
+                        }
+                    } else {
+                        span.style.transform = '';
+                        span.style.opacity = '';
+                    }
+                });
+            });
+
+            // Закрываем мобильное меню при клике на ссылку
+            mobileMenu.querySelectorAll('.nav-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    mobileMenu.classList.remove('active');
+                    burgerSpans.forEach(span => {
+                        span.style.transform = '';
+                        span.style.opacity = '';
+                    });
+                });
             });
         });
     </script>

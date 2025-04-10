@@ -19,13 +19,13 @@ client = OpenAI(
 def simplify_text(input_text):
     from bs4 import BeautifulSoup
 
-    try:
-        soup = BeautifulSoup(input_text, 'html.parser')
-        plain_text = soup.get_text()
+    # Очистка HTML перед обработкой
+    soup = BeautifulSoup(input_text, 'html.parser')
+    plain_text = soup.get_text()
 
-        response = client.responses.create(
-            model="gpt-3.5-turbo",
-            input=f"""Задача:
+    response = client.responses.create(
+        model="gpt-3.5-turbo",
+        input=f"""Задача:
 Найди в тексте сложные слова и формулировки и выведи в виде списка их упрощения следуя контексту и их самих.
 
 Дополнительные условия:
@@ -33,34 +33,28 @@ def simplify_text(input_text):
 Упрощения должны быть написаны так, чтобы их можно было подставить в текст сразу, без изменения вручную.
 
 Формат:
-слово или формулировка (полностью так же как и в данном тексте) → упрощение
-слово или формулировка (полностью так же как и в данном тексте) → упрощение
-слово или формулировка (полностью так же как и в данном тексте) → упрощение
+слово или формулировка → упрощение
+слово или формулировка → упрощение
+слово или формулировка → упрощение
 
 Текст:
 {input_text}"""
-        )
+    )
 
-        replacements = []
-        for line in response.output_text.split("\n"):
-            if "→" in line:
-                original, simple = line.split("→", 1)
-                replacements.append((original.strip(), simple.strip()))
+    try:
+        print(input_text)
+        result_soup = BeautifulSoup(input_text, 'html.parser')
+        simple = [i.split(" → ") for i in response.output_text.split("\n")]
+        print(response.output_text)
+        print(simple)
+        for i in simple:
+            if i[0].strip() != "":
+                elements = result_soup.find_all(string=lambda text: i[0] in text)
+                for element in elements:
+                    new_text = element.replace(i[0], i[1])
+                    element.replace_with(new_text)
 
-        # Заменяем слова с сохранением HTML-структуры
-        for original, simple in replacements:
-            for element in soup.find_all(string=lambda text: original in text):
-                new_tag = soup.new_tag("span")
-                new_tag.attrs = {
-                    "class": "simplify-mark",
-                    "data-original": original,
-                    "data-simple": simple
-                }
-                new_tag.string = original
-                element.replace_with(new_tag)
-
-        return str(soup)
-
+        return str(result_soup)
     except Exception as e:
         return f"[Ошибка]: {str(e)}"
 
