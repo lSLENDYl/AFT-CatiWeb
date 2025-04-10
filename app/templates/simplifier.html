@@ -12,7 +12,7 @@
             </div>
 
             <div class="buttons">
-                <button type="submit" class="button" id="submit">Упростить текст</button>
+                <button type="submit" class="button">Упростить текст</button>
             </div>
         </form>
         {% if simplified_text %}
@@ -22,12 +22,5 @@
         </div>
         {% endif %}
     </div>
-    <script>
-        document.getElementById('input_text').onkeypress = function(e) {
-            if (e.key === 'Enter' || e.keyCode === 13) {
-                e.preventDefault(); // Блокируем действие по умолчанию
-                document.getElementById('submit').click();
-            }
-        };
-    </script>
+
 {% endblock %}
