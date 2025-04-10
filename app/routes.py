@@ -4,7 +4,7 @@ from flask import render_template, flash, redirect, request, jsonify
 from app import simplifierscript, editorscript
 from collections import deque
 
-text_versions = deque(maxlen=10)  # Храним последние 10 версий текста
+text_versions = deque(maxlen=10)
 current_version = 0
 
 @app.route('/handle-space', methods=['POST'])
@@ -21,7 +21,6 @@ def process_text():
     data = request.get_json()
     input_html = data.get('text', '')
 
-    # Передаём исходный HTML с метками
     simplified_html, pairs = editorscript.simplify_text(input_html)
 
     return jsonify({
@@ -47,11 +46,9 @@ def login():
 
 @app.route('/editor', methods=["GET", "POST"])
 def editor(text=None):
-    # return render_template('editor.html', title='Редактор текста')
     if text:
         print(text)
         simplified_text = editorscript.simplify_text(text)
-        # print(simplified_text)
         return render_template("editor.html", title='Редактор текста', simplified_text=simplified_text, input_text=text)
     return render_template("editor.html", title='Редактор текста', simplified_text="", input_text="")
 

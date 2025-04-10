@@ -139,7 +139,6 @@
             color: white;
         }
 
-        /* Стили для форм и текстовых полей */
         input, textarea, select {
             color: white;
             background-color: rgba(255, 255, 255, 0.1);
@@ -150,12 +149,10 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
-        /* Стили для списков и сообщений */
         ul, li {
             color: white;
         }
 
-        /* Стили для ссылок */
         a {
             color: white;
         }
@@ -181,7 +178,6 @@
             box-shadow: 0 0 20px rgba(140, 215, 27, 0.9);
         }
 
-        /* Стили для кнопки "Упростить текст" */
         .button {
             background-color: #8102cd;
             color: white;
@@ -260,7 +256,6 @@
   <body>
     <div class="background"></div>
     <div class="arrows-container"></div>
-    <!-- Навигационная панель -->
     <div class="navbar">
         <a href="{{ url_for('index') }}" class="logo" data-color="#8102cd">ТЕКСТОПРОСТО</a>
         <div class="nav-buttons">
@@ -298,13 +293,11 @@
     
     {% block content %}{% endblock %}
 
-    <!-- Футер -->
     <footer>
         &copy; 2025 ТЕКСТОПРОСТО ДЛЯ "ТЕХНОСТРЕЛКА".
     </footer>
 
     <script>
-        // Добавляем эффект пульсации для фона
         document.addEventListener('DOMContentLoaded', function() {
             const background = document.querySelector('.background');
             let scale = 1;
@@ -323,20 +316,17 @@
 
             animate();
 
-            // Создаем летающие стрелочки
             function createArrow() {
                 const arrow = document.createElement('div');
                 const colors = ['green-arrow', 'purple-arrow', 'white-arrow'];
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
                 arrow.className = `arrow ${randomColor}`;
                 
-                // Случайная начальная позиция (учитываем отступы от краев и контента)
                 const navbarHeight = document.querySelector('.navbar').offsetHeight;
                 const footerHeight = document.querySelector('footer').offsetHeight;
                 const startX = Math.random() * (window.innerWidth - 200) + 100;
                 const startY = Math.random() * (window.innerHeight - navbarHeight - footerHeight - 200) + navbarHeight + 100;
                 
-                // Случайное направление движения
                 const angle = Math.random() * Math.PI * 2;
                 const speed = 50; // пикселей в секунду
                 
@@ -346,7 +336,6 @@
                 
                 document.querySelector('.arrows-container').appendChild(arrow);
                 
-                // Анимация движения
                 let x = startX;
                 let y = startY;
                 
@@ -354,8 +343,7 @@
                     x += Math.cos(angle) * speed / 60;
                     y += Math.sin(angle) * speed / 60;
                     
-                    // Если стрелочка вышла за пределы экрана или приблизилась к контенту, удаляем её
-                    if (x < -50 || x > window.innerWidth + 50 || 
+                    if (x < -50 || x > window.innerWidth + 50 ||
                         y < navbarHeight - 50 || y > window.innerHeight - footerHeight + 50) {
                         arrow.remove();
                         return;
@@ -369,19 +357,15 @@
                 moveArrow();
             }
             
-            // Создаем новую стрелочку каждые 3 секунды
             setInterval(createArrow, 3000);
             
-            // Создаем начальные стрелочки
             for (let i = 0; i < 8; i++) {
                 createArrow();
             }
 
-            // Определяем текущую страницу
             const currentPath = window.location.pathname;
             let activeColor = '#8102cd'; // Цвет по умолчанию
 
-            // Сопоставляем пути с цветами
             const pathColors = {
                 '/': '#1ddcbb',
                 '/editor': '#e60a78',
@@ -389,7 +373,6 @@
                 '/help': '#1e346e'
             };
 
-            // Находим цвет для текущей страницы
             for (const [path, color] of Object.entries(pathColors)) {
                 if (currentPath === path) {
                     activeColor = color;
@@ -397,12 +380,10 @@
                 }
             }
 
-            // Применяем цвет к навбару и футеру
             const navbar = document.querySelector('.navbar');
             const footer = document.querySelector('footer');
             const mobileMenu = document.querySelector('.mobile-menu');
 
-            // Устанавливаем цвет только если это не главная страница
             if (currentPath !== '/') {
                 navbar.style.backgroundColor = activeColor;
                 footer.style.backgroundColor = activeColor;
@@ -411,7 +392,6 @@
                 }
             }
 
-            // Добавляем эффект изменения цвета при наведении
             const navButtons = document.querySelectorAll('.nav-button, .logo');
             
             navButtons.forEach(button => {
@@ -429,7 +409,6 @@
                 }
             });
 
-            // Обработчик для мобильного меню
             if (mobileMenu) {
                 mobileMenu.querySelectorAll('.nav-button').forEach(button => {
                     const color = button.getAttribute('data-color');
@@ -445,7 +424,6 @@
                 });
             }
 
-            // Добавляем обработчик для бургер-меню
             const burgerMenu = document.querySelector('.burger-menu');
             const burgerSpans = burgerMenu.querySelectorAll('span');
 
@@ -467,7 +445,6 @@
                 });
             });
 
-            // Закрываем мобильное меню при клике на ссылку
             mobileMenu.querySelectorAll('.nav-button').forEach(button => {
                 button.addEventListener('click', () => {
                     mobileMenu.classList.remove('active');

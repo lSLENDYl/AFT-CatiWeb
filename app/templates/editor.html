@@ -20,7 +20,6 @@
     </form>
 </div>
 
-<!-- Контекстное меню с множеством вариантов -->
 <div id="simplify-menu" class="context-menu">
     <div class="menu-title">Заменить на:</div>
     <div id="simplify-options"></div>
@@ -29,6 +28,8 @@
 
 <script>
     let currentMarkedElement = null;
+    let isProcessing = false;
+    let lastSentHtml = "";
 
     document.getElementById('editableArea').addEventListener('click', (e) => {
         const mark = e.target.closest('.simplify-mark');
@@ -71,7 +72,6 @@
     function replaceWithOption(optionText) {
         if (currentMarkedElement) {
             const original = currentMarkedElement.dataset.original;
-
             currentMarkedElement.outerHTML =
                 `<span class="replaced-word"
                       data-original="${original}"
@@ -98,25 +98,33 @@
     });
 
     document.getElementById('editableArea').addEventListener('keydown', function(e) {
-        if (e.key === ' ') {
+        if (e.key === ' ' && !isProcessing) {
             e.preventDefault();
-            const editableDiv = this;
 
+            const editableDiv = this;
             document.execCommand('insertText', false, ' ');
 
-            const htmlBefore = editableDiv.innerHTML;
+            lastSentHtml = editableDiv.innerHTML;
+            isProcessing = true;
             document.getElementById('loading').style.display = 'flex';
 
             fetch('/process-text', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({text: htmlBefore})
+                body: JSON.stringify({text: lastSentHtml})
             })
             .then(response => response.json())
             .then(data => {
+                const currentHtml = editableDiv.innerHTML;
+
                 const parser = new DOMParser();
                 const newDoc = parser.parseFromString(data.simplified_text, 'text/html');
-                const newHTML = newDoc.body.innerHTML;
+                const simplifiedHtml = newDoc.body.innerHTML;
+
+                let userContinuation = '';
+                if (currentHtml.startsWith(lastSentHtml)) {
+                    userContinuation = currentHtml.substring(lastSentHtml.length);
+                }
 
                 const replaced = [...editableDiv.querySelectorAll('.replaced-word')];
                 replaced.forEach(el => {
@@ -124,7 +132,7 @@
                     if (match) match.replaceWith(el);
                 });
 
-                editableDiv.innerHTML = newDoc.body.innerHTML;
+                editableDiv.innerHTML = newDoc.body.innerHTML + userContinuation;
 
                 const range = document.createRange();
                 const sel = window.getSelection();
@@ -135,6 +143,7 @@
             })
             .catch(err => console.error('Ошибка:', err))
             .finally(() => {
+                isProcessing = false;
                 document.getElementById('loading').style.display = 'none';
             });
         }

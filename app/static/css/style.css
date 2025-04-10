@@ -1,20 +1,16 @@
-/* Общий шрифт */
 @font-face
 {
     font-family: "Bezier Sans";
     src: url(../fonts/Bezier_Sans_Regular.ttf);
 }
 
-/* Общие стили */
 body {
     font-family: 'Bezier Sans';
-    /*font-family: Arial, sans-serif;*/
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
 }
 
-/* Навигационная панель */
 .navbar {
     background-color: #660099;
     padding: 1rem;
@@ -47,16 +43,12 @@ body {
 
 
 
-/* Основной контент */
 .content {
-    /*max-width: 800px;*/
     margin: 2rem 20%;
     padding: 0 1rem;
-    padding-bottom: 100px; /* Отступ для футера */
+    padding-bottom: 100px;
 }
 
-/* Окно ввода текста */
-/* Стили для contenteditable */
 .text-input, .text-output {
     width: 100%;
     min-height: 200px;
@@ -69,10 +61,10 @@ body {
     line-height: 1.5;
     resize: vertical;
     transition: all 0.3s ease;
-    white-space: pre-wrap; /* Сохраняем переносы строк */
-    word-wrap: break-word; /* Перенос длинных слов */
-    overflow-wrap: break-word; /* Современный аналог word-wrap */
-    hyphens: auto; /* Автоматические переносы для длинных слов */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 textarea::placeholder {
@@ -93,7 +85,6 @@ textarea::placeholder {
     backdrop-filter: blur(3px);
 }
 
-/* Кнопки на главной странице */
 .buttons {
     display: flex;
     gap: 1rem;
@@ -122,7 +113,6 @@ textarea::placeholder {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Футер */
 footer {
     background-color: #660099;
     color: white;
@@ -165,7 +155,6 @@ footer {
     background-color: rgba(255, 230, 156, 0.4);
 }
 
-/* Стили для заменённых слов */
 .replaced-word {
     border-radius: 3px;
     border: 4px solid rgba(65, 181, 111, 0);
@@ -175,7 +164,6 @@ footer {
     transition: all 0.2s;
 }
 
-/* Контекстное меню */
 .context-menu {
     display: none;
     position: fixed;
