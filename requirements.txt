@@ -1,0 +1,5 @@
+flask
+SpeechRecognition
+pyAudio
+librosa
+wave

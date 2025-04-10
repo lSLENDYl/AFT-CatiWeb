@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+      <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.7.2/css/all.css">
+    <title>{% block title %}ТЕКСТОПРОСТО{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #8102cd;
+            padding: 15px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 3;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.5s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .nav-buttons-left {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .nav-buttons-right {
+            display: flex;
+            margin-left: auto;
+        }
+
+        .nav-button {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            position: relative;
+            font-size: 16px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+            width: auto;
+        }
+
+        .nav-button:hover {
+            transform: scale(1.1);
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin-right: 20px;
+        }
+
+        .logo:hover {
+            transform: scale(1.1);
+        }
+        
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-color: #3d3d3d;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            color: white;
+            flex: 1;
+            padding: 20px;
+            margin-top: 70px;
+            margin-bottom: 60px;
+        }
+
+        .arrows-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .arrow {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .arrow::before {
+            content: "→";
+            position: absolute;
+            font-size: 40px;
+            color: inherit;
+        }
+
+        .green-arrow {
+            color: #12cca1;
+        }
+
+        .purple-arrow {
+            color: #a921b5;
+        }
+
+        .white-arrow {
+            color: white;
+        }
+
+        input, textarea, select {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        ul, li {
+            color: white;
+        }
+
+        a {
+            color: white;
+        }
+
+        a:hover {
+            color: white;
+        }
+
+        footer {
+            background-color: #8102cd;
+            padding: 15px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 3;
+            transition: background-color 0.5s ease;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .simplify-button:hover {
+            box-shadow: 0 0 20px rgba(140, 215, 27, 0.9);
+        }
+
+        .button {
+            background-color: #8102cd;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(123, 254, 0, 0.9);
+        }
+
+        .burger-menu {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 21px;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .burger-menu span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background-color: white;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #8102cd;
+            z-index: 4;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            transition: background-color 0.5s ease;
+        }
+
+        .mobile-menu.active {
+            display: flex;
+        }
+
+        .mobile-menu .nav-button {
+            font-size: 24px;
+            padding: 15px 25px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-buttons {
+                display: none;
+            }
+
+            .burger-menu {
+                display: flex;
+            }
+
+            .navbar {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+  </head>
+  <body>
+    <div class="background"></div>
+    <div class="arrows-container"></div>
+    <div class="navbar">
+        <a href="{{ url_for('index') }}" class="logo" data-color="#8102cd">ТЕКСТОПРОСТО</a>
+        <div class="nav-buttons">
+            <div class="nav-buttons-left">
+                <a href="{{ url_for('editor') }}" class="nav-button" data-color="#e60a78">Редактор</a>
+                <a href="{{ url_for('simplifier') }}" class="nav-button" data-color="#12cca1">Упроститель</a>
+            </div>
+            <div class="nav-buttons-right">
+                <a href="{{ url_for('help') }}" class="nav-button" data-color="#1e346e"><i class="fa-solid fa-location-question" style="font-size: 28px;"></i></a>
+            </div>
+        </div>
+        <div class="burger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+    <div class="mobile-menu">
+        <a href="{{ url_for('index') }}" class="nav-button" data-color="#1ddcbb">Главная</a>
+        <a href="{{ url_for('editor') }}" class="nav-button" data-color="#e60a78">Редактор</a>
+        <a href="{{ url_for('simplifier') }}" class="nav-button" data-color="#12cca1">Упроститель</a>
+        <a href="{{ url_for('help') }}" class="nav-button" data-color="#1e346e">Помощь</a>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    
+    {% block content %}{% endblock %}
+
+    <footer>
+        &copy; 2025 ТЕКСТОПРОСТО ДЛЯ "ТЕХНОСТРЕЛКА".
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const background = document.querySelector('.background');
+            let scale = 1;
+            let direction = 0.0005;
+
+            function animate() {
+                scale += direction;
+                if (scale >= 1.1) {
+                    direction = -0.0005;
+                } else if (scale <= 1) {
+                    direction = 0.0005;
+                }
+                background.style.transform = `scale(${scale})`;
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            function createArrow() {
+                const arrow = document.createElement('div');
+                const colors = ['green-arrow', 'purple-arrow', 'white-arrow'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                arrow.className = `arrow ${randomColor}`;
+                
+                const navbarHeight = document.querySelector('.navbar').offsetHeight;
+                const footerHeight = document.querySelector('footer').offsetHeight;
+                const startX = Math.random() * (window.innerWidth - 200) + 100;
+                const startY = Math.random() * (window.innerHeight - navbarHeight - footerHeight - 200) + navbarHeight + 100;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 50; // пикселей в секунду
+                
+                arrow.style.left = `${startX}px`;
+                arrow.style.top = `${startY}px`;
+                arrow.style.transform = `rotate(${angle}rad)`;
+                
+                document.querySelector('.arrows-container').appendChild(arrow);
+                
+                let x = startX;
+                let y = startY;
+                
+                function moveArrow() {
+                    x += Math.cos(angle) * speed / 60;
+                    y += Math.sin(angle) * speed / 60;
+                    
+                    if (x < -50 || x > window.innerWidth + 50 ||
+                        y < navbarHeight - 50 || y > window.innerHeight - footerHeight + 50) {
+                        arrow.remove();
+                        return;
+                    }
+                    
+                    arrow.style.left = `${x}px`;
+                    arrow.style.top = `${y}px`;
+                    requestAnimationFrame(moveArrow);
+                }
+                
+                moveArrow();
+            }
+            
+            setInterval(createArrow, 3000);
+            
+            for (let i = 0; i < 8; i++) {
+                createArrow();
+            }
+
+            const currentPath = window.location.pathname;
+            let activeColor = '#8102cd'; // Цвет по умолчанию
+
+            const pathColors = {
+                '/': '#1ddcbb',
+                '/editor': '#e60a78',
+                '/simplifier': '#12cca1',
+                '/help': '#1e346e'
+            };
+
+            for (const [path, color] of Object.entries(pathColors)) {
+                if (currentPath === path) {
+                    activeColor = color;
+                    break;
+                }
+            }
+
+            const navbar = document.querySelector('.navbar');
+            const footer = document.querySelector('footer');
+            const mobileMenu = document.querySelector('.mobile-menu');
+
+            if (currentPath !== '/') {
+                navbar.style.backgroundColor = activeColor;
+                footer.style.backgroundColor = activeColor;
+                if (mobileMenu) {
+                    mobileMenu.style.backgroundColor = activeColor;
+                }
+            }
+
+            const navButtons = document.querySelectorAll('.nav-button, .logo');
+            
+            navButtons.forEach(button => {
+                const color = button.getAttribute('data-color');
+                if (color) {
+                    button.addEventListener('mouseenter', () => {
+                        navbar.style.background = color;
+                        footer.style.background = color;
+                    });
+
+                    button.addEventListener('mouseleave', () => {
+                        navbar.style.background = currentPath === '/' ? '#8102cd' : activeColor;
+                        footer.style.background = currentPath === '/' ? '#8102cd' : activeColor;
+                    });
+                }
+            });
+
+            if (mobileMenu) {
+                mobileMenu.querySelectorAll('.nav-button').forEach(button => {
+                    const color = button.getAttribute('data-color');
+                    if (color) {
+                        button.addEventListener('mouseenter', () => {
+                            mobileMenu.style.background = color;
+                        });
+
+                        button.addEventListener('mouseleave', () => {
+                            mobileMenu.style.background = currentPath === '/' ? '#8102cd' : activeColor;
+                        });
+                    }
+                });
+            }
+
+            const burgerMenu = document.querySelector('.burger-menu');
+            const burgerSpans = burgerMenu.querySelectorAll('span');
+
+            burgerMenu.addEventListener('click', function() {
+                mobileMenu.classList.toggle('active');
+                burgerSpans.forEach((span, index) => {
+                    if (mobileMenu.classList.contains('active')) {
+                        if (index === 0) {
+                            span.style.transform = 'rotate(45deg) translate(5px, 5px)';
+                        } else if (index === 1) {
+                            span.style.opacity = '0';
+                        } else {
+                            span.style.transform = 'rotate(-45deg) translate(7px, -6px)';
+                        }
+                    } else {
+                        span.style.transform = '';
+                        span.style.opacity = '';
+                    }
+                });
+            });
+
+            mobileMenu.querySelectorAll('.nav-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    mobileMenu.classList.remove('active');
+                    burgerSpans.forEach(span => {
+                        span.style.transform = '';
+                        span.style.opacity = '';
+                    });
+                });
+            });
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Редактор текста{% endblock %}
+
+{% block content %}
+<div class="content">
+    <h1>Редактор текста</h1>
+    <p>Это страница с редактором текста. Здесь вы можете редактировать и форматировать ваш текст.</p>
+
+    <form method="POST" id="mainForm">
+        <div class="form-group">
+            <div class="text-output"
+                 id="editableArea"
+                 contenteditable="true"
+                 data-placeholder="Введите текст здесь...">{{ simplified_text or input_text }}</div>
+            <input type="hidden" id="hiddenInput" name="input_text">
+        </div>
+
+        <h2 class="animate" id="loading">Загрузка...</h2>
+    </form>
+</div>
+
+<div id="simplify-menu" class="context-menu">
+    <div class="menu-title">Заменить на:</div>
+    <div id="simplify-options"></div>
+    <div class="menu-item" style="color: red;" id="skip-option">Не изменять</div>
+</div>
+
+<script>
+    let currentMarkedElement = null;
+    let isProcessing = false;
+    let lastSentHtml = "";
+
+    document.getElementById('editableArea').addEventListener('click', (e) => {
+        const mark = e.target.closest('.simplify-mark');
+        if (mark) {
+            currentMarkedElement = mark;
+            showSimplifyMenu(mark);
+            e.preventDefault();
+        }
+    });
+
+    function showSimplifyMenu(element) {
+        const menu = document.getElementById('simplify-menu');
+        const optionsContainer = document.getElementById('simplify-options');
+        optionsContainer.innerHTML = '';
+
+        const options = element.dataset.options.split(',');
+
+        options.forEach(option => {
+            const item = document.createElement('div');
+            item.classList.add('menu-item');
+            item.textContent = option.trim();
+            item.addEventListener('click', () => {
+                replaceWithOption(option.trim());
+            });
+            optionsContainer.appendChild(item);
+        });
+
+        document.getElementById('skip-option').onclick = () => {
+            const original = element.dataset.original;
+            element.outerHTML = `<span class="replaced-word" title="Оставлено без изменений">${original}</span>`;
+            hideMenu();
+        };
+
+        const rect = element.getBoundingClientRect();
+        menu.style.display = 'block';
+        menu.style.left = `${rect.left}px`;
+        menu.style.top = `${rect.bottom + 5}px`;
+    }
+
+    function replaceWithOption(optionText) {
+        if (currentMarkedElement) {
+            const original = currentMarkedElement.dataset.original;
+            currentMarkedElement.outerHTML =
+                `<span class="replaced-word"
+                      data-original="${original}"
+                      title="Заменено из: ${original}">${optionText}</span>`;
+            hideMenu();
+        }
+    }
+
+    function hideMenu() {
+        document.getElementById('simplify-menu').style.display = 'none';
+        currentMarkedElement = null;
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.simplify-mark') &&
+            !e.target.closest('#simplify-menu')) {
+            hideMenu();
+        }
+    });
+
+    document.getElementById('mainForm').addEventListener('submit', function(e) {
+        const editableDiv = document.getElementById('editableArea');
+        document.getElementById('hiddenInput').value = editableDiv.innerHTML;
+    });
+
+    document.getElementById('editableArea').addEventListener('keydown', function(e) {
+        if (e.key === ' ' && !isProcessing) {
+            e.preventDefault();
+
+            const editableDiv = this;
+            document.execCommand('insertText', false, ' ');
+
+            lastSentHtml = editableDiv.innerHTML;
+            isProcessing = true;
+            document.getElementById('loading').style.display = 'flex';
+
+            fetch('/process-text', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: lastSentHtml})
+            })
+            .then(response => response.json())
+            .then(data => {
+                const currentHtml = editableDiv.innerHTML;
+
+                const parser = new DOMParser();
+                const newDoc = parser.parseFromString(data.simplified_text, 'text/html');
+                const simplifiedHtml = newDoc.body.innerHTML;
+
+                let userContinuation = '';
+                if (currentHtml.startsWith(lastSentHtml)) {
+                    userContinuation = currentHtml.substring(lastSentHtml.length);
+                }
+
+                const replaced = [...editableDiv.querySelectorAll('.replaced-word')];
+                replaced.forEach(el => {
+                    const match = newDoc.body.querySelector(`[data-original="${el.dataset.original}"]`);
+                    if (match) match.replaceWith(el);
+                });
+
+                editableDiv.innerHTML = newDoc.body.innerHTML + userContinuation;
+
+                const range = document.createRange();
+                const sel = window.getSelection();
+                range.selectNodeContents(editableDiv);
+                range.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            })
+            .catch(err => console.error('Ошибка:', err))
+            .finally(() => {
+                isProcessing = false;
+                document.getElementById('loading').style.display = 'none';
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Упроститель текста{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <h1>Упроститель текста</h1>
+        <p>Введите текст, который нужно упростить:</p>
+        <form method="POST">
+            <div class="form-group">
+                <textarea class="text-input" id="input_text" placeholder="Введите ваш текст здесь..." name="input_text">{{ input_text }}</textarea>
+            </div>
+
+            <div class="buttons">
+                <button type="submit" class="button">Упростить текст</button>
+            </div>
+        </form>
+        {% if simplified_text %}
+        <h2>Результат:</h2>
+        <div>
+            <textarea class="text-output">{{ simplified_text }}</textarea>
+        </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
