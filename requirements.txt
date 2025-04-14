@@ -1,6 +1,5 @@
 autocorrect
 bs4
-collections
 flask
 flask_wtf
 librosa
