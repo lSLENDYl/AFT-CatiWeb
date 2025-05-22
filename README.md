@@ -38,6 +38,8 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 Добавление api ключа в app/config.py
+> [!NOTE]
+> API-ключ необходимо получить на сайте proxyapi.ru
 ```
 API_KEY = "your_api_key"
 ```
