@@ -37,6 +37,10 @@ venv\Scripts\activate
 ```
 pip install -r requirements.txt
 ```
+Добавление api ключа в app/config.py
+```
+API_KEY = "your_api_key"
+```
 ## Запуск
 ```
 flask run
