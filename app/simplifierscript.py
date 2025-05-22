@@ -1,7 +1,8 @@
 from openai import OpenAI
+from config import API_KEY
 
 client = OpenAI(
-    api_key="sk-tfFJUW6ns45XWgBD9IAKpdhPUkSVcDHb",
+    api_key=API_KEY,
     base_url="https://api.proxyapi.ru/openai/v1",
 )
 
