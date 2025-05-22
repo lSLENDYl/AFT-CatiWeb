@@ -2,10 +2,11 @@ import os
 from openai import OpenAI
 from bs4 import BeautifulSoup
 from autocorrect import Speller
+from config import API_KEY
 
 
 client = OpenAI(
-    api_key="sk-tfFJUW6ns45XWgBD9IAKpdhPUkSVcDHb",
+    api_key=API_KEY,
     base_url="https://api.proxyapi.ru/openai/v1",
 )
 
